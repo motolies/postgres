@@ -3,6 +3,16 @@ FROM postgres:${POSTGRES_VERSION}
 
 RUN echo "postgres image tag is ${POSTGRES_VERSION}"
 
+# ko_KR.UTF-8 로케일 설치
+# 공식 PostgreSQL 이미지(Debian 기반)에는 en_US.UTF-8만 포함되어 있음
+# 한글 정렬(가나다 순)을 위해 ko_KR.UTF-8 로케일 추가
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends locales \
+    && sed -i '/ko_KR.UTF-8/s/^# //g' /etc/locale.gen \
+    && locale-gen \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # pg_bigm 소스 빌드 (공식 패키지 미포함, 한글/CJK 2-gram 검색용)
 # v1.2-20250903: PostgreSQL 18 지원 (최신)
 # PG_MAJOR는 공식 postgres 이미지에서 기본 제공하는 환경변수 (예: 18)
@@ -36,3 +46,9 @@ CMD ["postgres", "-c", "config_file=/etc/postgresql/custom/postgresql.conf"]
 
 ENV POSTGRES_VERSION=$POSTGRES_VERSION
 ENV BUILD_TIMESTAMP=$BUILD_TIMESTAMP
+
+# 클러스터 초기화 시 기본 locale을 ko_KR.UTF-8로 설정
+# initdb 실행 시 이 값이 적용되어 template0, template1의 기본 COLLATE가 ko_KR.UTF-8이 됨
+# 따라서 CREATE DATABASE 시 별도 LC_COLLATE 지정 없이도 한글 정렬(가나다 순)이 기본 적용됨
+# docker run -e POSTGRES_INITDB_ARGS="..." 로 컨테이너 실행 시 오버라이드 가능
+ENV POSTGRES_INITDB_ARGS="--locale=ko_KR.UTF-8"
