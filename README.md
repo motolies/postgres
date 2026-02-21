@@ -296,26 +296,11 @@ query.where(cb.ilike(root.get("email"), "%" + keyword + "%"));
 
 ---
 
-## 사용자 생성 예시
+## 사용법
 
-```sql
--- 사용자 생성
-CREATE USER skyscape WITH PASSWORD 'skyscape';
+> [사용가이드](USAGE.md)
 
--- 데이터베이스 생성 (UTF8 인코딩, 사용자 소유)
-CREATE DATABASE skyscape
-    OWNER skyscape
-    ENCODING 'UTF8'
-    LC_COLLATE 'en_US.UTF-8'
-    LC_CTYPE 'en_US.UTF-8';
 
--- 권한 부여
-GRANT ALL PRIVILEGES ON DATABASE skyscape TO skyscape;
-
--- 스키마 권한 (PostgreSQL 15+에서 필요)
-\c skyscape
-GRANT ALL ON SCHEMA public TO skyscape;
-```
 
 ## DB 덤프 / 복구
 
