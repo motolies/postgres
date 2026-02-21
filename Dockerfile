@@ -1,6 +1,10 @@
 ARG POSTGRES_VERSION=latest
 FROM postgres:${POSTGRES_VERSION}
 
+# FROM 이후 ARG 재선언 (Docker에서 ARG 스코프는 FROM 기준으로 초기화됨)
+ARG POSTGRES_VERSION
+ARG BUILD_TIMESTAMP
+
 RUN echo "postgres image tag is ${POSTGRES_VERSION}"
 
 # ko_KR.UTF-8 로케일 설치
@@ -19,7 +23,7 @@ RUN apt-get update \
 # USE_PGXS=1 필수 (pg_bigm 빌드 요구사항)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        curl make gcc \
+        ca-certificates curl make gcc \
         postgresql-server-dev-${PG_MAJOR} \
         libicu-dev \
     && curl -L -o /tmp/pg_bigm.tar.gz \
@@ -27,7 +31,7 @@ RUN apt-get update \
     && cd /tmp && tar xzf pg_bigm.tar.gz \
     && cd pg_bigm-* && make USE_PGXS=1 && make USE_PGXS=1 install \
     && cd / && rm -rf /tmp/pg_bigm* \
-    && apt-get purge -y curl make gcc postgresql-server-dev-${PG_MAJOR} libicu-dev \
+    && apt-get purge -y ca-certificates curl make gcc postgresql-server-dev-${PG_MAJOR} libicu-dev \
     && apt-get autoremove -y && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
